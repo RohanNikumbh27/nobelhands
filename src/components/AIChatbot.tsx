@@ -132,18 +132,18 @@ export function AIChatbot() {
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
-            className="fixed bottom-6 right-6 z-50"
+            className="fixed bottom-6 right-6 z-50 "
           >
             <Button
               onClick={() => setIsOpen(true)}
-              className="h-14 w-14 rounded-full shadow-2xl bg-primary hover:bg-primary/90 relative"
+              className="h-14 w-14 rounded-full shadow-2xl bg-zinc-800 hover:bg-primary/90 relative"
               size="icon"
             >
               <MessageCircle className="h-6 w-6" />
               <span className="absolute -top-1 -right-1 flex h-5 w-5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-5 w-5 bg-orange-500 items-center justify-center">
-                  <Sparkles className="h-3 w-3 text-white" />
+                <span className=" absolute inline-flex h-full w-full rounded-full opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-6 w-6 bg-zinc-800 items-center justify-center p-2">
+                  <Sparkles className="h-1 w-1 text-zinc-500" />
                 </span>
               </span>
             </Button>
@@ -160,10 +160,10 @@ export function AIChatbot() {
             exit={{ opacity: 0, y: 100, scale: 0.8 }}
             className="fixed bottom-6 right-6 z-50 w-[380px] max-w-[calc(100vw-2rem)]"
           >
-            <Card className="shadow-2xl border-2">
-              <CardHeader className="bg-primary text-white rounded-t-lg">
+            <Card className="shadow-2xl border-2 p-0 bg-black">
+              <CardHeader className=" text-white rounded-lg m-0 bg-black ">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 justify-center">
                     <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center">
                       <Bot className="h-6 w-6" />
                     </div>
@@ -186,7 +186,7 @@ export function AIChatbot() {
                 </div>
               </CardHeader>
 
-              <CardContent className="p-0">
+              <CardContent className="p-0 !pb-2 ">
                 {/* Messages Area */}
                 <div className="h-[400px] overflow-y-auto p-4 space-y-4 bg-muted/20">
                   {messages.map((message) => (
@@ -238,7 +238,7 @@ export function AIChatbot() {
                 </div>
 
                 {/* Input Area */}
-                <div className="p-4 border-t bg-white">
+                <div className="p-4 pb-0 border-t bg-black">
                   <div className="flex gap-2">
                     <Input
                       value={inputMessage}
@@ -257,7 +257,7 @@ export function AIChatbot() {
                       <Send className="h-4 w-4" />
                     </Button>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2 text-center">
+                  <p className="text-xs text-[#808080] mt-2 text-center">
                     Nobelica AI • Powered by compassion & intelligence
                   </p>
                 </div>

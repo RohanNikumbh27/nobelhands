@@ -112,7 +112,7 @@ export function DonationSection() {
                       setSelectedAmount(amount);
                       setCustomAmount("");
                     }}
-                    className={`p-6 rounded-xl border-2 transition-all hover:scale-105 ${
+                    className={`p-6 rounded-xl border-2 transition-all hover:scale-105 cursor-pointer ${
                       selectedAmount === amount
                         ? "border-primary bg-primary/5"
                         : "border-border bg-card hover:border-primary/50"
@@ -155,7 +155,7 @@ export function DonationSection() {
                     <button
                       key={id}
                       onClick={() => setPaymentMethod(id)}
-                      className={`p-4 rounded-lg border-2 transition-all hover:scale-105 ${ 
+                      className={`p-4 rounded-lg border-2 transition-all hover:scale-105 cursor-pointer ${ 
                         paymentMethod === id
                           ? "border-primary bg-primary/5"
                           : "border-border bg-card hover:border-primary/50"
