@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from "./ui/sheet";
 import { Menu, Heart, Home, TrendingUp, Users, DollarSign, Target, BookOpen, Mail } from "lucide-react";
+import { motion } from "motion/react";
 
 const navItems = [
   { name: "Home", href: "#home", icon: Home },
@@ -61,7 +62,7 @@ export function Header() {
                 <span className="sr-only">Open menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-72">
+            <SheetContent side="right" className="w-72 sm:w-[350px]">
               <SheetHeader>
                 <SheetTitle className="flex items-center gap-2">
                   <Heart className="w-5 h-5 text-primary fill-primary" />
@@ -71,32 +72,60 @@ export function Header() {
                   Navigate through our website and make a difference
                 </SheetDescription>
               </SheetHeader>
-              <nav className="flex flex-col gap-2 mt-8">
-                {navItems.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <button
-                      key={item.name}
-                      onClick={() => handleNavClick(item.href)}
-                      className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-accent transition-colors text-left"
-                    >
-                      <Icon className="w-5 h-5 text-primary" />
-                      <span>{item.name}</span>
-                    </button>
-                  );
-                })}
-              </nav>
-              <div className="mt-8 p-4 bg-secondary rounded-lg">
-                <p className="text-sm text-muted-foreground mb-3">
-                  Every contribution matters. Help us feed those in need.
-                </p>
-                <Button
-                  onClick={() => handleNavClick("#donate-section")}
-                  className="w-full bg-primary hover:bg-primary/90"
+              <motion.div
+                initial="hidden"
+                animate="show"
+                className="flex flex-col h-full"
+              >
+                <motion.nav
+                  variants={{
+                    hidden: { opacity: 0 },
+                    show: {
+                      opacity: 1,
+                      transition: {
+                        staggerChildren: 0.1,
+                        delayChildren: 0.2,
+                      },
+                    },
+                  }}
+                  className="flex flex-col gap-2 mt-8 px-2"
                 >
-                  Donate Now
-                </Button>
-              </div>
+                  {navItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <motion.button
+                        key={item.name}
+                        onClick={() => handleNavClick(item.href)}
+                        variants={{
+                          hidden: { opacity: 0, x: -20 },
+                          show: { opacity: 1, x: 0 },
+                        }}
+                        transition={{ type: "spring", stiffness: 300, damping: 24 }}
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-accent transition-colors text-left"
+                      >
+                        <Icon className="w-5 h-5 text-primary" />
+                        <span className="font-medium">{item.name}</span>
+                      </motion.button>
+                    );
+                  })}
+                </motion.nav>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.8, duration: 0.5 }}
+                  className="mt-auto mb-8 p-4 bg-secondary rounded-lg"
+                >
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Every contribution matters. Help us feed those in need.
+                  </p>
+                  <Button
+                    onClick={() => handleNavClick("#donate-section")}
+                    className="w-full bg-primary hover:bg-primary/90"
+                  >
+                    Donate Now
+                  </Button>
+                </motion.div>
+              </motion.div>
             </SheetContent>
           </Sheet>
         </div>
