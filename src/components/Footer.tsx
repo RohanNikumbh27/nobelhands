@@ -12,7 +12,7 @@ export function Footer() {
               <span className="text-xl">Nobel Hands</span>
             </div>
             <p className="text-background/70 leading-relaxed">
-              A platform dedicated to ending hunger by empowering everyone to contribute, 
+              A platform dedicated to ending hunger by empowering everyone to contribute,
               no matter how small the amount.
             </p>
           </div>
@@ -32,12 +32,12 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a href="#" className="text-background/70 hover:text-background transition-colors">
+                <a href="#mission" className="text-background/70 hover:text-background transition-colors">
                   About Us
                 </a>
               </li>
               <li>
-                <a href="#" className="text-background/70 hover:text-background transition-colors">
+                <a href="#footer" className="text-background/70 hover:text-background transition-colors">
                   Contact
                 </a>
               </li>
@@ -65,7 +65,7 @@ export function Footer() {
         </div>
 
         <div className="border-t border-background/20 pt-8 text-center text-background/70">
-          <p>&copy; 2025 Nobel Hands. All rights reserved. Made with ❤️ for a hunger-free world.</p>
+          <p>&copy; 2026 Nobel Hands. All rights reserved. Made with ❤️ for a hunger-free world.</p>
         </div>
       </div>
     </footer>

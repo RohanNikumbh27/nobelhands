@@ -104,7 +104,7 @@ export function Header() {
                         className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-accent transition-colors text-left"
                       >
                         <Icon className="w-5 h-5 text-primary" />
-                        <span className="font-medium">{item.name}</span>
+                        <span className="font-medium text-lg">{item.name}</span>
                       </motion.button>
                     );
                   })}

@@ -214,7 +214,7 @@ export function AIChatbot() {
               inset-0 md:inset-auto md:bottom-6 md:right-6 
               w-full h-full md:w-[400px] md:h-[600px] md:max-h-[calc(100vh-2rem)]"
           >
-            <Card className="h-full flex flex-col shadow-2xl overflow-hidden border-0 md:border md:rounded-2xl">
+            <Card className="h-full flex flex-col shadow-2xl overflow-hidden border-0 rounded-none md:border md:rounded-2xl">
               {/* Header */}
               <div className="bg-gradient-to-r from-primary to-orange-600 p-4 shrink-0 relative overflow-hidden">
                 <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10" />
@@ -240,7 +240,8 @@ export function AIChatbot() {
                     onClick={() => setIsOpen(false)}
                     className="text-white hover:bg-white/20 rounded-full h-10 w-10 transition-colors"
                   >
-                    {window.innerWidth < 768 ? <Minimize2 className="h-5 w-5" /> : <X className="h-6 w-6" />}
+                    <Minimize2 className="h-5 w-5 md:hidden" />
+                    <X className="h-6 w-6 hidden md:block" />
                   </Button>
                 </div>
               </div>
@@ -301,9 +302,21 @@ export function AIChatbot() {
                       <Bot className="h-5 w-5 text-primary" />
                     </div>
                     <div className="bg-white border border-border/50 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm flex items-center gap-1.5 h-[44px]">
-                      <span className="w-1.5 h-1.5 bg-primary/60 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                      <span className="w-1.5 h-1.5 bg-primary/60 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                      <span className="w-1.5 h-1.5 bg-primary/60 rounded-full animate-bounce"></span>
+                      {[0, 1, 2].map((dot) => (
+                        <motion.span
+                          key={dot}
+                          initial={{ opacity: 0.5, y: 0 }}
+                          animate={{ opacity: 1, y: -4 }}
+                          transition={{
+                            duration: 0.5,
+                            repeat: Infinity,
+                            repeatType: "reverse",
+                            delay: dot * 0.15,
+                            ease: "easeInOut"
+                          }}
+                          className="w-1.5 h-1.5 bg-gradient-to-tr from-primary to-orange-500 rounded-full"
+                        />
+                      ))}
                     </div>
                   </motion.div>
                 )}

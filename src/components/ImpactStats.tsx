@@ -1,7 +1,7 @@
 "use client"
 
 import { Users, Heart, Utensils, MapPin } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 interface StatCardProps {
   icon: React.ReactNode;
@@ -12,28 +12,43 @@ interface StatCardProps {
 
 function StatCard({ icon, value, label, suffix = "+" }: StatCardProps) {
   const [count, setCount] = useState(0);
+  const [hasAnimated, setHasAnimated] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const duration = 2000;
-    const steps = 60;
-    const increment = value / steps;
-    let current = 0;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !hasAnimated) {
+          setHasAnimated(true);
 
-    const timer = setInterval(() => {
-      current += increment;
-      if (current >= value) {
-        setCount(value);
-        clearInterval(timer);
-      } else {
-        setCount(Math.floor(current));
-      }
-    }, duration / steps);
+          const duration = 2000;
+          const steps = 60;
+          const increment = value / steps;
+          let current = 0;
 
-    return () => clearInterval(timer);
-  }, [value]);
+          const timer = setInterval(() => {
+            current += increment;
+            if (current >= value) {
+              setCount(value);
+              clearInterval(timer);
+            } else {
+              setCount(Math.floor(current));
+            }
+          }, duration / steps);
+        }
+      },
+      { threshold: 0.3 }
+    );
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [value, hasAnimated]);
 
   return (
-    <div className="flex flex-col items-center text-center p-8 bg-card rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
+    <div ref={cardRef} className="flex flex-col items-center text-center p-8 bg-card rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
       <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
         <div className="text-primary">
           {icon}
