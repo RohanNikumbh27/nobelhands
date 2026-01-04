@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { Wallet, CreditCard, Smartphone, Building2, Loader2, CheckCircle2, ArrowLeft, QrCode } from "lucide-react";
+import { Wallet, CreditCard, Smartphone, Building2, Loader2, CheckCircle2, ArrowLeft, QrCode, ExternalLink } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import QRCode from "qrcode";
 
@@ -18,6 +18,11 @@ interface PaymentDialogProps {
   onPaymentSuccess: () => void;
 }
 
+// UPI Configuration
+const UPI_VPA = "nobelhands@ybl";
+const UPI_NAME = "Nobel Hands Charity";
+const TRANSACTION_NOTE = "Thank you for your Donation";
+
 export function PaymentDialog({
   isOpen,
   onClose,
@@ -28,9 +33,8 @@ export function PaymentDialog({
 }: PaymentDialogProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [step, setStep] = useState<"form" | "processing" | "success">("form");
-  
+
   // Form states for different payment methods
-  const [upiId, setUpiId] = useState("");
   const [cardNumber, setCardNumber] = useState("");
   const [cardName, setCardName] = useState("");
   const [cardExpiry, setCardExpiry] = useState("");
@@ -46,7 +50,7 @@ export function PaymentDialog({
     setTimeout(() => {
       setStep("success");
       setIsProcessing(false);
-      
+
       // Call success callback after showing success for 2 seconds
       setTimeout(() => {
         onPaymentSuccess();
@@ -58,7 +62,6 @@ export function PaymentDialog({
   const handleClose = () => {
     setStep("form");
     setIsProcessing(false);
-    setUpiId("");
     setCardNumber("");
     setCardName("");
     setCardExpiry("");
@@ -69,20 +72,22 @@ export function PaymentDialog({
 
   const canSubmit = () => {
     if (paymentMethod === "wallet") return amount <= walletBalance;
-    if (paymentMethod === "upi") return upiId.length > 0;
+    if (paymentMethod === "upi") return true; // UPI is now intent-based/manual verification
     if (paymentMethod === "qr") return true; // QR is always ready once generated
     if (paymentMethod === "card") return cardNumber.length >= 16 && cardName.length > 0 && cardExpiry.length > 0 && cardCvv.length >= 3;
     if (paymentMethod === "netbanking") return bankName.length > 0;
     return false;
   };
 
+  // UPI String generation
+  const getUpiString = () => {
+    return `upi://pay?pa=${UPI_VPA}&pn=${encodeURIComponent(UPI_NAME)}&am=${amount}&cu=INR&tn=${encodeURIComponent(TRANSACTION_NOTE)}`;
+  };
+
   // Generate QR code when QR payment method is selected
   useEffect(() => {
-    if (paymentMethod === "qr" && isOpen) {
-      // UPI payment string format for India
-      const upiString = `upi://pay?pa=nobelhands@upi&pn=Nobel Hands&am=${amount}&cu=INR&tn=Donation to feed the hungry`;
-      
-      QRCode.toDataURL(upiString, {
+    if ((paymentMethod === "qr" || paymentMethod === "upi") && isOpen) {
+      QRCode.toDataURL(getUpiString(), {
         width: 300,
         margin: 2,
         color: {
@@ -150,26 +155,56 @@ export function PaymentDialog({
                   </div>
                 )}
 
-                {/* UPI Payment */}
+                {/* UPI Payment (Intent Flow) */}
                 {paymentMethod === "upi" && (
-                  <div className="space-y-3 sm:space-y-4">
-                    <div>
-                      <Label htmlFor="upi">UPI ID</Label>
-                      <Input
-                        id="upi"
-                        placeholder="yourname@upi"
-                        value={upiId}
-                        onChange={(e) => setUpiId(e.target.value)}
-                        className="mt-2"
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Enter your UPI ID (e.g., name@paytm, name@phonepe)
+                  <div className="space-y-4">
+                    <div className="text-center p-4 bg-white rounded-lg border-2 border-primary/10">
+                      <Smartphone className="h-12 w-12 mx-auto text-primary mb-3" />
+                      <h4 className="font-medium text-foreground mb-2">Pay via UPI App</h4>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Click the button below to pay using GPay, PhonePe, Paytm, or any other UPI app installed on your device.
                       </p>
+
+                      <a
+                        href={getUpiString()}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center justify-center w-full px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium"
+                      >
+                        Pay ₹{amount} with App
+                        <ExternalLink className="ml-2 h-4 w-4" />
+                      </a>
                     </div>
-                    <div className="flex gap-2">
-                      <Button type="button" variant="outline" size="sm" onClick={() => setUpiId("demo@paytm")}>
-                        Demo UPI
-                      </Button>
+
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-background px-2 text-muted-foreground">Or scan QR code</span>
+                      </div>
+                    </div>
+
+                    {/* Fallback QR for Desktop users who selected UPI */}
+                    <div className="text-center">
+                      {qrCodeUrl ? (
+                        <div className="inline-block p-2 bg-white rounded-lg border shadow-sm">
+                          <img
+                            src={qrCodeUrl}
+                            alt="Payment QR Code"
+                            className="w-32 h-32 mx-auto"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-32 h-32 mx-auto bg-gray-100 rounded-lg flex items-center justify-center">
+                          <Loader2 className="h-6 w-6 text-primary animate-spin" />
+                        </div>
+                      )}
+                      <p className="text-xs text-muted-foreground mt-2">Scan with any UPI app</p>
+                    </div>
+
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-600">
+                      After completing the payment in your app, click &quot;I&apos;ve Paid&quot; below.
                     </div>
                   </div>
                 )}
@@ -182,9 +217,9 @@ export function PaymentDialog({
                         <p className="text-sm mb-4">Scan this QR code with any UPI app to pay</p>
                         {qrCodeUrl ? (
                           <div className="inline-block p-4 bg-white rounded-lg shadow-sm border">
-                            <img 
-                              src={qrCodeUrl} 
-                              alt="Payment QR Code" 
+                            <img
+                              src={qrCodeUrl}
+                              alt="Payment QR Code"
                               className="w-48 h-48 sm:w-64 sm:h-64 mx-auto"
                             />
                           </div>
@@ -198,7 +233,7 @@ export function PaymentDialog({
                             <strong>Amount:</strong> ₹{amount}
                           </p>
                           <p className="text-xs text-muted-foreground mt-1">
-                            Use GPay, PhonePe, Paytm, or any UPI app
+                            Paying: {UPI_NAME}
                           </p>
                         </div>
                       </div>
@@ -305,7 +340,7 @@ export function PaymentDialog({
                     disabled={!canSubmit() || isProcessing}
                     className="flex-1 bg-primary hover:bg-primary/90"
                   >
-                    {paymentMethod === "qr" ? "I've Paid" : `Pay ₹${amount}`}
+                    {(paymentMethod === "qr" || paymentMethod === "upi") ? "I've Paid" : `Pay ₹${amount}`}
                   </Button>
                 </div>
               </div>
@@ -324,9 +359,9 @@ export function PaymentDialog({
                 <div className="inline-flex h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-primary/10 items-center justify-center mb-4 sm:mb-6 relative">
                   <Loader2 className="h-8 w-8 sm:h-10 sm:w-10 text-primary animate-spin" />
                 </div>
-                <h3 className="text-lg sm:text-xl mb-2">Processing Payment</h3>
+                <h3 className="text-lg sm:text-xl mb-2">Verifying Payment</h3>
                 <p className="text-muted-foreground">
-                  Please wait while we process your donation...
+                  Please wait while we verify your transaction...
                 </p>
                 <div className="mt-6 flex justify-center">
                   <div className="flex gap-1">
@@ -356,9 +391,9 @@ export function PaymentDialog({
                 >
                   <CheckCircle2 className="h-8 w-8 sm:h-10 sm:w-10 text-green-600" />
                 </motion.div>
-                <h3 className="text-lg sm:text-xl mb-2">Payment Successful!</h3>
+                <h3 className="text-lg sm:text-xl mb-2">Payment Recorded!</h3>
                 <p className="text-sm sm:text-base text-muted-foreground px-4">
-                  Thank you for your generous donation of ₹{amount}
+                  Thank you for your generous contribution of ₹{amount}
                 </p>
               </div>
             </motion.div>

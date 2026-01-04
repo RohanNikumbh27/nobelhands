@@ -11,10 +11,10 @@ import { PaymentSuccessScreen } from "./PaymentSuccessScreen";
 import { AnimatedModal } from "./AnimatedModal";
 
 const donationAmounts = [
-  { amount: 2, label: "₹2", description: "A helping hand", icon: Heart },
-  { amount: 50, label: "₹50", description: "A cup of tea & snack", icon: Coffee },
   { amount: 100, label: "₹100", description: "A nutritious meal", icon: Pizza },
   { amount: 500, label: "₹500", description: "Feed a family", icon: UtensilsCrossed },
+  { amount: 50, label: "₹50", description: "A cup of tea & snack", icon: Coffee },
+  { amount: 2, label: "₹2", description: "A helping hand", icon: Heart },
 ];
 
 type PaymentMethod = "wallet" | "upi" | "qr" | "card" | "netbanking";
@@ -31,7 +31,7 @@ const paymentMethods = [
 const WALLET_BALANCE = 1250;
 
 export function DonationSection() {
-  const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
+  const [selectedAmount, setSelectedAmount] = useState<number | null>(50);
   const [customAmount, setCustomAmount] = useState("");
   const [donorName, setDonorName] = useState("");
   const [donorEmail, setDonorEmail] = useState("");
