@@ -8,6 +8,7 @@ import { Heart, Coffee, Pizza, UtensilsCrossed, Wallet, CreditCard, Smartphone, 
 import { AIRecommendation } from "./AIRecommendation";
 import { PaymentDialog } from "./PaymentDialog";
 import { PaymentSuccessScreen } from "./PaymentSuccessScreen";
+import { AnimatedModal } from "./AnimatedModal";
 
 const donationAmounts = [
   { amount: 2, label: "₹2", description: "A helping hand", icon: Heart },
@@ -19,11 +20,11 @@ const donationAmounts = [
 type PaymentMethod = "wallet" | "upi" | "qr" | "card" | "netbanking";
 
 const paymentMethods = [
-  { id: "wallet" as PaymentMethod, label: "Charity Wallet", description: "Use wallet balance", icon: Wallet },
-  { id: "upi" as PaymentMethod, label: "UPI", description: "GPay, PhonePe, etc.", icon: Smartphone },
   { id: "qr" as PaymentMethod, label: "QR Code", description: "Scan & Pay", icon: QrCode },
-  { id: "card" as PaymentMethod, label: "Card", description: "Credit/Debit Card", icon: CreditCard },
-  { id: "netbanking" as PaymentMethod, label: "Net Banking", description: "Online banking", icon: Building2 },
+  { id: "upi" as PaymentMethod, label: "UPI", description: "GPay, PhonePe, etc.", icon: Smartphone },
+  // { id: "wallet" as PaymentMethod, label: "Charity Wallet", description: "Use wallet balance", icon: Wallet },
+  // { id: "card" as PaymentMethod, label: "Card", description: "Credit/Debit Card", icon: CreditCard },
+  // { id: "netbanking" as PaymentMethod, label: "Net Banking", description: "Online banking", icon: Building2 },
 ];
 
 // Mock wallet balance - in a real app, this would come from a backend
@@ -34,15 +35,24 @@ export function DonationSection() {
   const [customAmount, setCustomAmount] = useState("");
   const [donorName, setDonorName] = useState("");
   const [donorEmail, setDonorEmail] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("wallet");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("qr");
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [showSuccessScreen, setShowSuccessScreen] = useState(false);
   const [lastTransactionId, setLastTransactionId] = useState("");
+  const [alertState, setAlertState] = useState({
+    isOpen: false,
+    title: "Invalid Amount",
+    message: ""
+  });
 
   const handleDonate = () => {
     const amount = selectedAmount || parseFloat(customAmount);
     if (!amount || amount < 1) {
-      alert("Please enter a valid donation amount");
+      setAlertState({
+        isOpen: true,
+        title: "Invalid Amount",
+        message: "Please enter a valid donation amount"
+      });
       return;
     }
 
@@ -54,7 +64,7 @@ export function DonationSection() {
     // Generate transaction ID
     const txnId = `NH${Date.now()}${Math.floor(Math.random() * 1000)}`;
     setLastTransactionId(txnId);
-    
+
     // Close payment dialog and show success screen
     setShowPaymentDialog(false);
     setShowSuccessScreen(true);
@@ -96,152 +106,154 @@ export function DonationSection() {
             </div>
 
             <Card id="donation-form" className="shadow-xl scroll-mt-8">
-            <CardHeader>
-              <CardTitle>Your Donation</CardTitle>
-              <CardDescription>
-                Select a preset amount or enter a custom donation
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-8">
-              {/* Preset Amounts */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                {donationAmounts.map(({ amount, label, description, icon: Icon }) => (
-                  <button
-                    key={amount}
-                    onClick={() => {
-                      setSelectedAmount(amount);
-                      setCustomAmount("");
-                    }}
-                    className={`p-6 rounded-xl border-2 transition-all hover:scale-105 cursor-pointer ${
-                      selectedAmount === amount
+              <CardHeader>
+                <CardTitle>Your Donation</CardTitle>
+                <CardDescription>
+                  Select a preset amount or enter a custom donation
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-8">
+                {/* Preset Amounts */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  {donationAmounts.map(({ amount, label, description, icon: Icon }) => (
+                    <button
+                      key={amount}
+                      onClick={() => {
+                        setSelectedAmount(amount);
+                        setCustomAmount("");
+                      }}
+                      className={`p-6 rounded-xl border-2 transition-all hover:scale-105 cursor-pointer ${selectedAmount === amount
                         ? "border-primary bg-primary/5"
                         : "border-border bg-card hover:border-primary/50"
-                    }`}
-                  >
-                    <Icon className={`w-8 h-8 mx-auto mb-3 ${
-                      selectedAmount === amount ? "text-primary" : "text-muted-foreground"
-                    }`} />
-                    <div className={`mb-1 ${
-                      selectedAmount === amount ? "text-primary" : "text-foreground"
-                    }`}>
-                      {label}
-                    </div>
-                    <div className="text-xs text-muted-foreground">{description}</div>
-                  </button>
-                ))}
-              </div>
-
-              {/* Custom Amount */}
-              <div>
-                <label className="block mb-2 text-foreground">Custom Amount (₹)</label>
-                <Input
-                  type="number"
-                  placeholder="Enter amount"
-                  value={customAmount}
-                  onChange={(e) => {
-                    setCustomAmount(e.target.value);
-                    setSelectedAmount(null);
-                  }}
-                  className="text-lg"
-                  min="1"
-                />
-              </div>
-
-              {/* Payment Method Selection */}
-              <div>
-                <label className="block mb-3 text-foreground">Payment Method</label>
-                <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-                  {paymentMethods.map(({ id, label, description, icon: Icon }) => (
-                    <button
-                      key={id}
-                      onClick={() => setPaymentMethod(id)}
-                      className={`p-4 rounded-lg border-2 transition-all hover:scale-105 cursor-pointer ${ 
-                        paymentMethod === id
-                          ? "border-primary bg-primary/5"
-                          : "border-border bg-card hover:border-primary/50"
-                      }`}
+                        }`}
                     >
-                      <Icon className={`w-6 h-6 mx-auto mb-2 ${
-                        paymentMethod === id ? "text-primary" : "text-muted-foreground"
-                      }`} />
-                      <div className={`text-sm mb-1 ${
-                        paymentMethod === id ? "text-primary" : "text-foreground"
-                      }`}>
+                      <Icon className={`w-8 h-8 mx-auto mb-3 ${selectedAmount === amount ? "text-primary" : "text-muted-foreground"
+                        }`} />
+                      <div className={`mb-1 ${selectedAmount === amount ? "text-primary" : "text-foreground"
+                        }`}>
                         {label}
                       </div>
                       <div className="text-xs text-muted-foreground">{description}</div>
                     </button>
                   ))}
                 </div>
-                {paymentMethod === "wallet" && (
-                  <div className="mt-3 p-3 bg-primary/5 border border-primary/20 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Available Balance:</span>
-                      <span className="text-primary">₹{WALLET_BALANCE}</span>
-                    </div>
+
+                {/* Custom Amount */}
+                <div>
+                  <label className="block mb-2 text-foreground">Custom Amount (₹)</label>
+                  <Input
+                    type="number"
+                    placeholder="Enter amount"
+                    value={customAmount}
+                    onChange={(e) => {
+                      setCustomAmount(e.target.value);
+                      setSelectedAmount(null);
+                    }}
+                    className="text-lg"
+                    min="1"
+                  />
+                </div>
+
+                {/* Payment Method Selection */}
+                <div>
+                  <label className="block mb-3 text-foreground">Payment Method</label>
+                  <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+                    {paymentMethods.map(({ id, label, description, icon: Icon }) => (
+                      <button
+                        key={id}
+                        onClick={() => setPaymentMethod(id)}
+                        className={`p-4 rounded-lg border-2 transition-all hover:scale-105 cursor-pointer ${paymentMethod === id
+                          ? "border-primary bg-primary/5"
+                          : "border-border bg-card hover:border-primary/50"
+                          }`}
+                      >
+                        <Icon className={`w-6 h-6 mx-auto mb-2 ${paymentMethod === id ? "text-primary" : "text-muted-foreground"
+                          }`} />
+                        <div className={`text-sm mb-1 ${paymentMethod === id ? "text-primary" : "text-foreground"
+                          }`}>
+                          {label}
+                        </div>
+                        <div className="text-xs text-muted-foreground">{description}</div>
+                      </button>
+                    ))}
                   </div>
-                )}
-              </div>
-
-              {/* Donor Information */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block mb-2 text-foreground">Name (Optional)</label>
-                  <Input
-                    type="text"
-                    placeholder="Your name"
-                    value={donorName}
-                    onChange={(e) => setDonorName(e.target.value)}
-                  />
+                  {paymentMethod === "wallet" && (
+                    <div className="mt-3 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Available Balance:</span>
+                        <span className="text-primary">₹{WALLET_BALANCE}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <label className="block mb-2 text-foreground">Email (Optional)</label>
-                  <Input
-                    type="email"
-                    placeholder="your.email@example.com"
-                    value={donorEmail}
-                    onChange={(e) => setDonorEmail(e.target.value)}
-                  />
+
+                {/* Donor Information */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block mb-2 text-foreground">Name (Optional)</label>
+                    <Input
+                      type="text"
+                      placeholder="Your name"
+                      value={donorName}
+                      onChange={(e) => setDonorName(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block mb-2 text-foreground">Email (Optional)</label>
+                    <Input
+                      type="email"
+                      placeholder="your.email@example.com"
+                      value={donorEmail}
+                      onChange={(e) => setDonorEmail(e.target.value)}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              {/* Donate Button */}
-              <Button
-                onClick={handleDonate}
-                className="w-full bg-primary hover:bg-primary/90 text-white py-6 text-lg"
-                size="lg"
-              >
-                <Heart className="w-5 h-5 mr-2 fill-current" />
-                Donate {selectedAmount ? `₹${selectedAmount}` : customAmount ? `₹${customAmount}` : "Now"}
-              </Button>
+                {/* Donate Button */}
+                <Button
+                  onClick={handleDonate}
+                  className="w-full bg-primary hover:bg-primary/90 text-white py-6 text-lg"
+                  size="lg"
+                >
+                  <Heart className="w-5 h-5 mr-2 fill-current" />
+                  Donate {selectedAmount ? `₹${selectedAmount}` : customAmount ? `₹${customAmount}` : "Now"}
+                </Button>
 
-              <p className="text-xs text-center text-muted-foreground">
-                🔒 Secure payment · 100% of your donation goes to feeding the hungry
-              </p>
-            </CardContent>
-          </Card>
+                <p className="text-xs text-center text-muted-foreground">
+                  🔒 Secure payment · 100% of your donation goes to feeding the hungry
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    {/* Payment Dialog */}
-    <PaymentDialog
-      isOpen={showPaymentDialog}
-      onClose={() => setShowPaymentDialog(false)}
-      amount={selectedAmount || parseFloat(customAmount) || 0}
-      paymentMethod={paymentMethod}
-      walletBalance={WALLET_BALANCE}
-      onPaymentSuccess={handlePaymentSuccess}
-    />
+      {/* Payment Dialog */}
+      <PaymentDialog
+        isOpen={showPaymentDialog}
+        onClose={() => setShowPaymentDialog(false)}
+        amount={selectedAmount || parseFloat(customAmount) || 0}
+        paymentMethod={paymentMethod}
+        walletBalance={WALLET_BALANCE}
+        onPaymentSuccess={handlePaymentSuccess}
+      />
 
-    {/* Success Screen */}
-    <PaymentSuccessScreen
-      isOpen={showSuccessScreen}
-      onClose={handleSuccessClose}
-      amount={selectedAmount || parseFloat(customAmount) || 0}
-      donorName={donorName}
-      transactionId={lastTransactionId}
-    />
-  </>
+      {/* Success Screen */}
+      <PaymentSuccessScreen
+        isOpen={showSuccessScreen}
+        onClose={handleSuccessClose}
+        amount={selectedAmount || parseFloat(customAmount) || 0}
+        donorName={donorName}
+        transactionId={lastTransactionId}
+      />
+
+      <AnimatedModal
+        isOpen={alertState.isOpen}
+        onClose={() => setAlertState((prev) => ({ ...prev, isOpen: false }))}
+        title={alertState.title}
+        description={alertState.message}
+        variant="error"
+      />
+    </>
   );
 }
